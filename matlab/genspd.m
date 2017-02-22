@@ -1,5 +1,4 @@
-function [S, invS] = genspd(d, density, m, v)
-
+function [S, invS] = genspd(d, density, m, v, compressive)
 % GENSPD Generate a random sparse positive-definite matrix.
 %
 % FORMAT
@@ -16,7 +15,9 @@ function [S, invS] = genspd(d, density, m, v)
 % COPYRIGHT : Alfredo A. Kalaitzis, 2012
 %
 % RCA
-
+if nargin < 5
+    compressive = false;
+end
 spN = ceil((d^2-d)/2 * density);    % Number of non-zeros elements that satisfy the density.
 sel = randperm(d^2);                % Random positions.
 sel( mod(sel,d+1) == 1 ) = [];      % Remove positions of the diagonal.
@@ -25,6 +26,9 @@ S = zeros(d);
 S(sel) = 1;                         % Non-zero positions mask.
 S = triu(S + S',1);                 % Upper triangular after balancing.
 S = S .* (randn(d)*sqrt(v) + m);    % Apply mask to random non-zero entries.
+if compressive
+    S = -abs(S);
+end
 S = S + S';                         % Symmetrify.
 pd = 1;
 diagonal = eye(d);
